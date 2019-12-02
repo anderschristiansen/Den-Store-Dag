@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>820931448748-t92i0pnkrd751tskita9ai7dtb6u70ep.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.820931448748-t92i0pnkrd751tskita9ai7dtb6u70ep</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDnVgPQflizqGcWe9QfKsTC0pdjvT57zcs</string>
+	<key>GCM_SENDER_ID</key>
+	<string>820931448748</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.denStoreDag</string>
+	<key>PROJECT_ID</key>
+	<string>den-store-dag</string>
+	<key>STORAGE_BUCKET</key>
+	<string>den-store-dag.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false/>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false/>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true/>
+	<key>IS_GCM_ENABLED</key>
+	<true/>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true/>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:820931448748:ios:bb4dca715b503a61c37409</string>
+	<key>DATABASE_URL</key>
+	<string>https://den-store-dag.firebaseio.com</string>
+</dict>
+</plist>

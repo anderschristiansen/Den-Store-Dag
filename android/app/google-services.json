@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "820931448748",
+    "firebase_url": "https://den-store-dag.firebaseio.com",
+    "project_id": "den-store-dag",
+    "storage_bucket": "den-store-dag.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:820931448748:android:75903b1286320ddfc37409",
+        "android_client_info": {
+          "package_name": "com.example.den_store_dag"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "820931448748-oeo1gvqpojug31mtr1mdrah3uradjntu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCU-RwfYCp5bFEp4-5MIdyjWdI-SCmgW1I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "820931448748-oeo1gvqpojug31mtr1mdrah3uradjntu.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "820931448748-t92i0pnkrd751tskita9ai7dtb6u70ep.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.denStoreDag"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

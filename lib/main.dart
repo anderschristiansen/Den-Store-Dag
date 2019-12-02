@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        StreamProvider<Report>.value(value: Global.reportRef.documentStream),
+        // StreamProvider<Report>.value(value: Global.reportRef.documentStream),
         StreamProvider<FirebaseUser>.value(value: AuthService().user),
       ],
       child: MaterialApp(
@@ -25,6 +25,7 @@ class MyApp extends StatelessWidget {
         // Named Routes
         routes: {
           '/': (context) => LoginScreen(),
+          '/gifts': (context) => GiftsScreen(),
           // '/topics': (context) => TopicsScreen(),
           // '/profile': (context) => ProfileScreen(),
           // '/about': (context) => AboutScreen(),
