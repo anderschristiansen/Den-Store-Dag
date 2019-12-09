@@ -117,13 +117,29 @@ class Gift {
 class Guest {
   String id;
   String name;
-  bool claimed;
 
-  Guest({this.id, this.name, this.claimed});
+  Guest({this.id, this.name});
 
   Guest.fromMap(Map data) {
     id = data['id'] ?? '';
     name = data['name'] ?? '';
+  }
+}
+
+class User {
+  // String uid;
+  String name;
+  String phoneNumber;
+  String guestId;
+  bool claimed;
+
+  User({this.name, this.phoneNumber, this.guestId, this.claimed});
+
+  User.fromMap(Map data) {
+    // id = data['id'] ?? '';
+    name = data['name'] ?? '';
+    phoneNumber = data['phoneNumber'] ?? '';
+    guestId = data['guestId'] ?? '';
     claimed = data['claimed'] ?? false;
   }
 }

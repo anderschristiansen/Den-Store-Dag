@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_linkify/flutter_linkify.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../services/services.dart';
 import '../shared/shared.dart';
 
 class GiftsScreen extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -16,8 +17,9 @@ class GiftsScreen extends StatelessWidget {
             body: GridView.count(
               primary: false,
               padding: const EdgeInsets.all(20.0),
-              crossAxisSpacing: 10.0,
-              crossAxisCount: 2,
+              // crossAxisSpacing: 10.0,
+              mainAxisSpacing: 30.0,
+              crossAxisCount: 1,
               children: gifts.map((gift) => GiftItem(gift: gift)).toList(),
             ),
           );
@@ -39,6 +41,10 @@ class GiftItem extends StatelessWidget {
       child: Hero(
         tag: gift.image,
         child: Card(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          elevation: 5,
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: () {
@@ -49,31 +55,23 @@ class GiftItem extends StatelessWidget {
               );
             },
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Image.asset('assets/covers/${gift.image}',
-                Image.network(gift.image,
+                Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: Text(
+                    gift.name,
+                    style: Theme.of(context).textTheme.headline,
+                    overflow: TextOverflow.fade,
+                    softWrap: false,
+                  ),
+                ),
+                Expanded(
+                    child: Image.network(
+                  gift.image,
                   fit: BoxFit.contain,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.only(left: 10, right: 10),
-                        child: Text(
-                          gift.name,
-                          style: TextStyle(
-                              height: 1.5, fontWeight: FontWeight.bold),
-                          overflow: TextOverflow.fade,
-                          softWrap: false,
-                        ),
-                      ),
-                    ),
-                    // Text(topic.description)
-                  ],
-                ),
+                )),
                 // )
                 // TopicProgress(topic: topic),
               ],
@@ -94,21 +92,73 @@ class GiftScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Theme.of(context).primaryColor,
       ),
-      body: ListView(children: [
-        Hero(
-          tag: gift.image,
-          child: Image.network(gift.image,
-              width: MediaQuery.of(context).size.width),
+      body: Padding(
+          padding: const EdgeInsets.all(40.0),
+          child: Column(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(30.0),
+                child: Text(
+                  gift.name,
+                  style: Theme.of(context).textTheme.title,
+                ),
+              ),
+              Hero(
+                tag: gift.image,
+                child: Image.network(gift.image,
+                    width: MediaQuery.of(context).size.width),
+              ),
+              Padding(
+                  padding: const EdgeInsets.only(top: 30.0, bottom: 30),
+                  child: Linkify(
+                    onOpen: _onOpen,
+                    text:
+                        "Made by https://cretezy.com\n\nMail: example@gmail.com",
+                  )),
+              ChooseGiftButton(text: 'VÆLG GAVE'),
+            ],
+          )),
+    );
+  }
+
+  Future<void> _onOpen(LinkableElement link) async {
+    if (await canLaunch(link.url)) {
+      await launch(link.url);
+    } else {
+      throw 'Could not launch $link';
+    }
+  }
+}
+
+class ChooseGiftButton extends StatelessWidget {
+  final Color color;
+  final String text;
+  final Function loginMethod;
+
+  const ChooseGiftButton({Key key, this.text, this.color, this.loginMethod})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 10),
+      child: FlatButton(
+        padding: EdgeInsets.all(20),
+        color: Theme.of(context).buttonColor,
+        onPressed: () async {
+          // var user = await loginMethod();
+          // if (user != null) {
+          //   Navigator.pushReplacementNamed(context, '/home');
+          // }
+        },
+        child: Text(
+          '$text',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Theme.of(context).textTheme.button.color),
         ),
-        Text(
-          gift.name,
-          style:
-              TextStyle(height: 2, fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        // GiftList(gift: gift)
-      ]),
+      ),
     );
   }
 }
@@ -119,7 +169,7 @@ class GiftScreen extends StatelessWidget {
 
 //   @override
 //   Widget build(BuildContext context) {
-    
+
 //     return Column(
 //         children: gift.quizzes.map((quiz) {
 //       return Card(

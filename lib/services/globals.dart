@@ -13,11 +13,13 @@ class Global {
   static final Map models = {
     Gift: (data) => Gift.fromMap(data),
     Guest: (data) => Guest.fromMap(data),
+    User: (data) => User.fromMap(data)
   };
 
   // Firestore References for Writes
   static final Collection<Gift> giftsRef = Collection<Gift>(path: 'gifts');
   static final Collection<Guest> guestsRef = Collection<Guest>(path: 'guests');
+  static final UserData<User> userRef = UserData<User>(collection: 'users');
 
   // static final UserData<Report> reportRef = UserData<Report>(collection: 'reports');
   // static final Collection<Topic> topicsRef = Collection<Topic>(path: 'topics');

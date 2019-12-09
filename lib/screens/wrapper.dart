@@ -29,14 +29,13 @@ class _WrapperScreenState extends State<WrapperScreen> {
         top: false,
         child: Scaffold(
           appBar: AppBar(
-            backgroundColor: Colors.deepPurple,
+            backgroundColor: Theme.of(context).primaryColor,
             title: Text(_appBarTitle[_currentIndex]),
             actions: [
               IconButton(
                 icon:
                     Icon(FontAwesomeIcons.userCircle, color: Colors.pink[200]),
-                onPressed: () => 
-                Navigator.pushNamed(context, '/profile'),
+                onPressed: () => Navigator.pushNamed(context, '/profile'),
               )
             ],
           ),

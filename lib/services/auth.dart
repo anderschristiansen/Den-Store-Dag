@@ -42,20 +42,16 @@ class AuthService {
     return user;
   }
 
-  // Future<void> updateUserData(FirebaseUser user) {
-  //   DocumentReference reportRef = _db.collection('reports').document(user.uid);
-  //   return reportRef.setData({'uid': user.uid, 'lastActivity': DateTime.now()}, merge: true);
-  // }
-
   Future<void> updateUserData(FirebaseUser user, String phoneNumber, Guest guest) async {
-    // var guests = (await Global.guestsRef.getData())
-    //     .where((guests) => guests.id == guest.id && guests.name == guest.name)
-    //     .toList();
+    DocumentReference userRef = _db.collection('users').document(user.uid);
 
-
-    DocumentReference guestRef = _db.collection('guests').;
-
-    // return doc.setData({'uid': user.uid, 'phoneNumber': phoneNumber, 'claimed': true});
+    return userRef.setData({
+      'uid': user.uid,
+      'phoneNumber': phoneNumber,
+      'name': guest.name,
+      'guestId': guest.id,
+      'claimed': true
+    });
   }
 
   Future<void> signOut() {

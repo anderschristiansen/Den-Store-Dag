@@ -13,8 +13,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // StreamProvider<Guest>.value(value: Global.guestsRef.documentStream),
-        StreamProvider<FirebaseUser>.value(value: AuthService().user),
+        // StreamProvider<User>.value(value: Global.userRef.documentStream),
+        StreamProvider<FirebaseUser>.value(value: AuthService().user)
       ],
       child: MaterialApp(
         // Firebase Analytics
@@ -32,16 +32,22 @@ class MyApp extends StatelessWidget {
         // Theme
         theme: ThemeData(
           fontFamily: 'Nunito',
+          primaryColor: Colors.deepPurple,
+          buttonColor: Colors.deepPurpleAccent,
           bottomAppBarTheme: BottomAppBarTheme(
             color: Colors.black87,
           ),
           brightness: Brightness.light,
           textTheme: TextTheme(
+            title: TextStyle(fontSize: 25),
+            headline: TextStyle(fontSize: 20),
+            subhead: TextStyle(color: Colors.grey),
             body1: TextStyle(fontSize: 18),
             body2: TextStyle(fontSize: 16),
-            button: TextStyle(letterSpacing: 1.5, fontWeight: FontWeight.bold),
-            headline: TextStyle(fontWeight: FontWeight.bold),
-            subhead: TextStyle(color: Colors.grey),
+            button: TextStyle(
+                color: Colors.white,
+                letterSpacing: 1.5,
+                fontWeight: FontWeight.bold),
           ),
           buttonTheme: ButtonThemeData(),
         ),
