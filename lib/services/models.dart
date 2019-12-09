@@ -113,3 +113,17 @@ class Gift {
     );
   }
 }
+
+class Guest {
+  String id;
+  String name;
+  bool claimed;
+
+  Guest({this.id, this.name, this.claimed});
+
+  Guest.fromMap(Map data) {
+    id = data['id'] ?? '';
+    name = data['name'] ?? '';
+    claimed = data['claimed'] ?? false;
+  }
+}

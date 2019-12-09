@@ -6,15 +6,15 @@ class BottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       items: [
-        BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.graduationCap, size: 20),
-            title: Text('Topics')),
-        BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.bolt, size: 20),
-            title: Text('About')),
-        BottomNavigationBarItem(
-            icon: Icon(FontAwesomeIcons.userCircle, size: 20),
-            title: Text('Profile')),
+          BottomNavigationBarItem(
+              icon: Icon(FontAwesomeIcons.home, size: 20),
+              title: Text('Hjem')),
+          BottomNavigationBarItem(
+              icon: Icon(FontAwesomeIcons.gifts, size: 20),
+              title: Text('Ønsker')),
+          BottomNavigationBarItem(
+              icon: Icon(FontAwesomeIcons.userCircle, size: 20),
+              title: Text('Profile')),
       ].toList(),
       fixedColor: Colors.deepPurple[200],
       onTap: (int idx) {

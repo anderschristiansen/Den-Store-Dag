@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // StreamProvider<Report>.value(value: Global.reportRef.documentStream),
+        // StreamProvider<Guest>.value(value: Global.guestsRef.documentStream),
         StreamProvider<FirebaseUser>.value(value: AuthService().user),
       ],
       child: MaterialApp(
@@ -25,10 +25,8 @@ class MyApp extends StatelessWidget {
         // Named Routes
         routes: {
           '/': (context) => LoginScreen(),
-          '/gifts': (context) => GiftsScreen(),
-          // '/topics': (context) => TopicsScreen(),
-          // '/profile': (context) => ProfileScreen(),
-          // '/about': (context) => AboutScreen(),
+          '/home': (context) => WrapperScreen(),
+          '/profile': (context) => ProfileScreen(),
         },
 
         // Theme
@@ -37,7 +35,7 @@ class MyApp extends StatelessWidget {
           bottomAppBarTheme: BottomAppBarTheme(
             color: Colors.black87,
           ),
-          brightness: Brightness.dark,
+          brightness: Brightness.light,
           textTheme: TextTheme(
             body1: TextStyle(fontSize: 18),
             body2: TextStyle(fontSize: 16),

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/services.dart';
 import '../shared/shared.dart';
-import '../screens/screens.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class GiftsScreen extends StatelessWidget {
 
@@ -14,17 +12,6 @@ class GiftsScreen extends StatelessWidget {
         if (snap.hasData) {
           List<Gift> gifts = snap.data;
           return Scaffold(
-            appBar: AppBar(
-              backgroundColor: Colors.deepPurple,
-              title: Text('Ønsker'),
-              actions: [
-                IconButton(
-                  icon: Icon(FontAwesomeIcons.userCircle,
-                      color: Colors.pink[200]),
-                  onPressed: () => Navigator.pushNamed(context, '/profile'),
-                )
-              ],
-            ),
             // drawer: GiftDrawer(topics: snap.data),
             body: GridView.count(
               primary: false,
@@ -33,7 +20,6 @@ class GiftsScreen extends StatelessWidget {
               crossAxisCount: 2,
               children: gifts.map((gift) => GiftItem(gift: gift)).toList(),
             ),
-            bottomNavigationBar: BottomNav(),
           );
         } else {
           return LoadingScreen();

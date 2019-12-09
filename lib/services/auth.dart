@@ -1,7 +1,10 @@
+import 'package:den_store_dag/services/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
+
+import 'models.dart';
 
 class AuthService {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -24,7 +27,7 @@ class AuthService {
       );
 
       FirebaseUser user = (await _auth.signInWithCredential(credential)).user;
-      updateUserData(user);
+      // updateUserData(user);
 
       return user;
     } catch (error) {
@@ -35,14 +38,24 @@ class AuthService {
 
   Future<FirebaseUser> anonLogin() async {
     FirebaseUser user = (await _auth.signInAnonymously()).user;
-    updateUserData(user);
+    // updateUserData(user);
     return user;
   }
 
-  Future<void> updateUserData(FirebaseUser user) {
-    DocumentReference reportRef = _db.collection('reports').document(user.uid);
+  // Future<void> updateUserData(FirebaseUser user) {
+  //   DocumentReference reportRef = _db.collection('reports').document(user.uid);
+  //   return reportRef.setData({'uid': user.uid, 'lastActivity': DateTime.now()}, merge: true);
+  // }
 
-    return reportRef.setData({'uid': user.uid, 'lastActivity': DateTime.now()}, merge: true);
+  Future<void> updateUserData(FirebaseUser user, String phoneNumber, Guest guest) async {
+    // var guests = (await Global.guestsRef.getData())
+    //     .where((guests) => guests.id == guest.id && guests.name == guest.name)
+    //     .toList();
+
+
+    DocumentReference guestRef = _db.collection('guests').;
+
+    // return doc.setData({'uid': user.uid, 'phoneNumber': phoneNumber, 'claimed': true});
   }
 
   Future<void> signOut() {
