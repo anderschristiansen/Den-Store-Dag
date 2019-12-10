@@ -38,7 +38,7 @@ dependencies:
   pin_input_text_field: ^2.1.0
   flushbar: ^1.9.1
   flutter_linkify: ^2.1.0
-  url_launcher: ^5.3.0
+  url_launcher: ^4.0.3
 
 dev_dependencies:
   flutter_test:

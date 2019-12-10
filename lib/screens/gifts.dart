@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/services.dart';
 import '../shared/shared.dart';
 
@@ -13,11 +12,9 @@ class GiftsScreen extends StatelessWidget {
         if (snap.hasData) {
           List<Gift> gifts = snap.data;
           return Scaffold(
-            // drawer: GiftDrawer(topics: snap.data),
             body: GridView.count(
               primary: false,
               padding: const EdgeInsets.all(20.0),
-              // crossAxisSpacing: 10.0,
               mainAxisSpacing: 30.0,
               crossAxisCount: 1,
               children: gifts.map((gift) => GiftItem(gift: gift)).toList(),
@@ -93,29 +90,33 @@ class GiftScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
+        title: Text(gift.name),
       ),
       body: Padding(
           padding: const EdgeInsets.all(40.0),
           child: Column(
             children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.all(30.0),
-                child: Text(
-                  gift.name,
-                  style: Theme.of(context).textTheme.title,
-                ),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.all(30.0),
+              //   child: Text(
+              //     gift.name,
+              //     style: Theme.of(context).textTheme.title,
+              //   ),
+              // ),
               Hero(
                 tag: gift.image,
                 child: Image.network(gift.image,
                     width: MediaQuery.of(context).size.width),
               ),
               Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: Divider(color: Colors.grey),
+              ),
+              Padding(
                   padding: const EdgeInsets.only(top: 30.0, bottom: 30),
-                  child: Linkify(
-                    onOpen: _onOpen,
-                    text:
-                        "Made by https://cretezy.com\n\nMail: example@gmail.com",
+                  child: FlatButton(
+                    onPressed: _launchURL,
+                    child: Text('Gå til hjemmeside'),
                   )),
               ChooseGiftButton(text: 'VÆLG GAVE'),
             ],
@@ -123,11 +124,11 @@ class GiftScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _onOpen(LinkableElement link) async {
-    if (await canLaunch(link.url)) {
-      await launch(link.url);
+  _launchURL() async {
+    if (await canLaunch(gift.web)) {
+      await launch(gift.web);
     } else {
-      throw 'Could not launch $link';
+      throw 'Could not launch ${gift.web}';
     }
   }
 }
