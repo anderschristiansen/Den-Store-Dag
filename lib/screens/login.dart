@@ -1,8 +1,8 @@
 import 'package:den_store_dag/shared/shared.dart';
+import 'package:den_store_dag/widgets/pincode.dart';
+import 'package:den_store_dag/widgets/widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:pin_input_text_field/pin_input_text_field.dart';
 import '../services/services.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -18,11 +18,11 @@ class LoginScreenState extends State<LoginScreen> {
   String _verificationId;
   List<Guest> _guests;
 
-  final _guestIdController = TextEditingController();
-  final _phoneNumberController = TextEditingController();
-  final _smsController = TextEditingController();
+  String _group;
+  String _phoneNumber;
+  String _smsCode;
 
-  bool _showGuestId = true;
+  bool _showGroup = true;
   bool _showPhoneNumber = false;
   bool _showSmsCode = false;
   bool _showAttending = false;
@@ -43,73 +43,69 @@ class LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        padding: EdgeInsets.fromLTRB(30, 50, 30, 0),
+        padding: EdgeInsets.fromLTRB(30, 100, 30, 0),
         decoration: BoxDecoration(),
         child: Wrap(
           spacing: 20,
           runSpacing: 30,
           alignment: WrapAlignment.center,
           children: [
-            FlutterLogo(
-              size: 150,
-            ),
             Text(
               'Log ind for at starte',
               style: Theme.of(context).textTheme.headline,
               textAlign: TextAlign.center,
             ),
-            _showGuestId
-                ? TextField(
-                    // decoration: _pinDecoration,
-                    controller: _guestIdController,
-                    textInputAction: TextInputAction.go,
-                  )
+            _showGroup
+                ? new Pincode(
+                    length: 1,
+                    inputType: TextInputType.text,
+                    onPressed: (newValue) {
+                      setState(() {
+                        _group = newValue;
+                      });
+                    })
                 : new Container(),
-            _showGuestId
-                ? LoginButton(
+            _showGroup
+                ? Button(
                     text: 'TJEK AKTIVERINGSKODE',
-                    icon: FontAwesomeIcons.code,
-                    color: Colors.black45,
-                    loginMethod: _verifyGuestId,
-                  )
-                : new Container(),
-            _showPhoneNumber
-                ? PinInputTextField(
-                    pinLength: 8,
-                    // decoration: _pinDecoration,
-                    controller: _phoneNumberController,
-                    autoFocus: true,
-                    textInputAction: TextInputAction.go,
-                    onSubmit: (pin) {
-                      debugPrint('submit pin:$pin');
+                    onPressed: () {
+                      _verifyGroup();
                     },
                   )
                 : new Container(),
             _showPhoneNumber
-                ? LoginButton(
+                ? new Pincode(
+                    length: 8,
+                    inputType: TextInputType.phone,
+                    onPressed: (newValue) {
+                      setState(() {
+                        _phoneNumber = newValue;
+                      });
+                    })
+                : new Container(),
+            _showPhoneNumber
+                ? Button(
                     text: 'SEND SMS KODE',
-                    icon: FontAwesomeIcons.phone,
-                    color: Colors.black45,
-                    loginMethod: _verifyPhoneNumber,
-                  )
+                    onPressed: () {
+                      _verifyPhoneNumber();
+                    })
                 : new Container(),
             _showSmsCode
-                ? PinInputTextField(
-                    pinLength: 6,
-                    controller: _smsController,
-                    autoFocus: true,
-                    textInputAction: TextInputAction.go,
-                    onSubmit: (pin) {
-                      debugPrint('submit pin:$pin');
-                    },
-                  )
+                ? new Pincode(
+                    length: 6,
+                    inputType: TextInputType.number,
+                    onPressed: (newValue) {
+                      setState(() {
+                        _smsCode = newValue;
+                      });
+                    })
                 : new Container(),
             _showSmsCode
-                ? LoginButton(
+                ? Button(
                     text: 'LOG IND',
-                    icon: FontAwesomeIcons.phone,
-                    color: Colors.black45,
-                    loginMethod: _signInWithPhoneNumber,
+                    onPressed: () {
+                      _signInWithPhoneNumber();
+                    },
                   )
                 : new Container(),
             _showAttending
@@ -131,19 +127,19 @@ class LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _verifyGuestId() async {
+  void _verifyGroup() async {
     _guests = (await Global.guestsRef.getData())
-        .where((guests) => guests.id == _guestIdController.text)
+        .where((guests) => guests.group == _group)
         .toList();
 
     if (_guests.isNotEmpty) {
       setState(() {
-        _showGuestId = false;
+        _showGroup = false;
         _showPhoneNumber = true;
       });
     } else {
       setState(() {
-        _showGuestId = true;
+        _showGroup = true;
         _showPhoneNumber = false;
       });
       FlushbarHelper.createError(
@@ -194,7 +190,7 @@ class LoginScreenState extends State<LoginScreen> {
     };
 
     await _firebaseAuth.verifyPhoneNumber(
-        phoneNumber: '+45' + _phoneNumberController.text,
+        phoneNumber: '+45' + _phoneNumber,
         timeout: const Duration(seconds: 5),
         verificationCompleted: verificationCompleted,
         verificationFailed: verificationFailed,
@@ -205,7 +201,7 @@ class LoginScreenState extends State<LoginScreen> {
   void _signInWithPhoneNumber() async {
     final AuthCredential credential = PhoneAuthProvider.getCredential(
       verificationId: _verificationId,
-      smsCode: _smsController.text,
+      smsCode: _smsCode,
     );
     _user = (await _firebaseAuth.signInWithCredential(credential)).user;
     _currentUser = await _firebaseAuth.currentUser();
@@ -217,43 +213,11 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   void _claimUser(Guest guest) async {
-    auth.updateUserData(_user, _phoneNumberController.text, guest);
+    auth.updateUserData(_user, _phoneNumber, guest);
 
     assert(_user.uid == _currentUser.uid);
     if (_user != null) {
       Navigator.pushReplacementNamed(context, '/home');
     }
-  }
-}
-
-class LoginButton extends StatelessWidget {
-  final Color color;
-  final IconData icon;
-  final String text;
-  final Function loginMethod;
-
-  const LoginButton(
-      {Key key, this.text, this.icon, this.color, this.loginMethod})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 10),
-      child: FlatButton.icon(
-        padding: EdgeInsets.all(30),
-        icon: Icon(icon, color: Colors.white),
-        color: color,
-        onPressed: () async {
-          var user = await loginMethod();
-          if (user != null) {
-            Navigator.pushReplacementNamed(context, '/home');
-          }
-        },
-        label: Expanded(
-          child: Text('$text', textAlign: TextAlign.center),
-        ),
-      ),
-    );
   }
 }

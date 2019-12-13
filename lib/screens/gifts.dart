@@ -1,13 +1,18 @@
+import 'dart:ui';
+
+import 'package:den_store_dag/widgets/button.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/services.dart';
 import '../shared/shared.dart';
 
 class GiftsScreen extends StatelessWidget {
+  final AuthService auth = AuthService();
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: Global.giftsRef.getData(),
+    return StreamBuilder(
+      stream: Global.giftsRef.streamData(),
       builder: (BuildContext context, AsyncSnapshot snap) {
         if (snap.hasData) {
           List<Gift> gifts = snap.data;
@@ -34,47 +39,76 @@ class GiftItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Hero(
-        tag: gift.image,
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.0),
-          ),
-          elevation: 5,
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (BuildContext context) => GiftScreen(gift: gift),
+    var taken = gift.group == null ? false : true;
+
+    return Hero(
+      tag: gift.image,
+      child: Stack(
+        children: <Widget>[
+          Positioned.fill(
+            child: Card(
+                color: taken ? Colors.white : Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15.0),
                 ),
-              );
-            },
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 20),
-                  child: Text(
-                    gift.name,
-                    style: Theme.of(context).textTheme.headline,
-                    overflow: TextOverflow.fade,
-                    softWrap: false,
+                elevation: 5,
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (BuildContext context) =>
+                            GiftScreen(gift: gift),
+                      ),
+                    );
+                  },
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20),
+                        child: Text(
+                          gift.name,
+                          style: Theme.of(context).textTheme.headline,
+                          overflow: TextOverflow.fade,
+                          softWrap: false,
+                        ),
+                      ),
+                      Expanded(
+                        child: taken
+                            ? Container(
+                                child: BackdropFilter(
+                                  filter:
+                                      ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                                  child: Container(
+                                    color: Colors.white.withOpacity(0.5),
+                                  ),
+                                ),
+                                decoration: BoxDecoration(
+                                    image: DecorationImage(
+                                        image: new NetworkImage(gift.image),
+                                        fit: BoxFit.contain)),
+                              )
+                            : Image.network(gift.image, fit: BoxFit.contain),
+                      ),
+                    ],
                   ),
-                ),
-                Expanded(
-                    child: Image.network(
-                  gift.image,
-                  fit: BoxFit.contain,
                 )),
-                // )
-                // TopicProgress(topic: topic),
-              ],
-            ),
           ),
-        ),
+          taken
+              ? Positioned(
+                  bottom: 145,
+                  top: 155,
+                  right: 100,
+                  left: 100,
+                  child: Button(
+                      text: 'Frigiv ønske',
+                      onPressed: () {
+                        _releaseGift(gift);
+                      }))
+              : new Container(),
+        ],
       ),
     );
   }
@@ -96,29 +130,24 @@ class GiftScreen extends StatelessWidget {
           padding: const EdgeInsets.all(40.0),
           child: Column(
             children: <Widget>[
-              // Padding(
-              //   padding: const EdgeInsets.all(30.0),
-              //   child: Text(
-              //     gift.name,
-              //     style: Theme.of(context).textTheme.title,
-              //   ),
-              // ),
               Hero(
                 tag: gift.image,
                 child: Image.network(gift.image,
                     width: MediaQuery.of(context).size.width),
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 20.0),
-                child: Divider(color: Colors.grey),
-              ),
-              Padding(
-                  padding: const EdgeInsets.only(top: 30.0, bottom: 30),
-                  child: FlatButton(
-                    onPressed: _launchURL,
-                    child: Text('Gå til hjemmeside'),
-                  )),
-              ChooseGiftButton(text: 'VÆLG GAVE'),
+              Padding(padding: const EdgeInsets.only(top: 20.0)),
+              if (gift.web != null)
+                Padding(
+                    padding: const EdgeInsets.only(top: 30.0, bottom: 30),
+                    child: FlatButton(
+                      onPressed: _launchURL,
+                      child: Text('Gå til hjemmeside'),
+                    )),
+              Button(
+                  text: 'VÆLG GAVE',
+                  onPressed: () {
+                    _selectGift(gift);
+                  }),
             ],
           )),
     );
@@ -133,35 +162,15 @@ class GiftScreen extends StatelessWidget {
   }
 }
 
-class ChooseGiftButton extends StatelessWidget {
-  final Color color;
-  final String text;
-  final Function loginMethod;
+void _releaseGift(Gift gift) async {
+  Document<Gift> ref = Document(path: 'gifts/${gift.id}');
+  ref.upsert({'group': null});
+}
 
-  const ChooseGiftButton({Key key, this.text, this.color, this.loginMethod})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 10),
-      child: FlatButton(
-        padding: EdgeInsets.all(20),
-        color: Theme.of(context).buttonColor,
-        onPressed: () async {
-          // var user = await loginMethod();
-          // if (user != null) {
-          //   Navigator.pushReplacementNamed(context, '/home');
-          // }
-        },
-        child: Text(
-          '$text',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: Theme.of(context).textTheme.button.color),
-        ),
-      ),
-    );
-  }
+void _selectGift(Gift gift) async {
+  var user = await Global.userRef.getDocument();
+  Document<Gift> ref = Document(path: 'gifts/${gift.id}');
+  ref.upsert({'group': user.group});
 }
 
 // class GiftList extends StatelessWidget {

@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // StreamProvider<User>.value(value: Global.userRef.documentStream),
+        StreamProvider<List<Gift>>.value(value: Global.giftsRef.streamData()),
         StreamProvider<FirebaseUser>.value(value: AuthService().user)
       ],
       child: MaterialApp(

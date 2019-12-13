@@ -94,18 +94,34 @@
 //   }
 // }
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Gift {
   String id;
+  String group;
   String name;
   String image;
   String web;
   int price;
 
-  Gift({this.id, this.name, this.image, this.web, this.price});
+  Gift({this.id, this.group, this.name, this.image, this.web, this.price});
 
   factory Gift.fromMap(Map data) {
     return Gift(
-      id: data['id'],
+      id: '',
+      group: data['group'],
+      name: data['name'],
+      image: data['image'],
+      web: data['web'],
+      price: data['price'] ?? 0,
+    );
+  }
+
+  factory Gift.fromSnapshot(DocumentSnapshot doc) {
+    var data = doc.data;
+    return Gift(
+      id: doc.documentID,
+      group: data['group'],
       name: data['name'],
       image: data['image'],
       web: data['web'],
@@ -116,13 +132,14 @@ class Gift {
 
 class Guest {
   String id;
+  String group;
   String name;
 
-  Guest({this.id, this.name});
+  Guest({this.id, this.group, this.name});
 
-  Guest.fromMap(Map data) {
-    id = data['id'] ?? '';
-    name = data['name'] ?? '';
+  factory Guest.fromSnapshot(DocumentSnapshot doc) {
+    var data = doc.data;
+    return Guest(id: doc.documentID, group: data['group'], name: data['name']);
   }
 }
 
@@ -130,16 +147,15 @@ class User {
   // String uid;
   String name;
   String phoneNumber;
-  String guestId;
+  String group;
   bool claimed;
 
-  User({this.name, this.phoneNumber, this.guestId, this.claimed});
+  User({this.name, this.phoneNumber, this.group, this.claimed});
 
   User.fromMap(Map data) {
-    // id = data['id'] ?? '';
     name = data['name'] ?? '';
     phoneNumber = data['phoneNumber'] ?? '';
-    guestId = data['guestId'] ?? '';
+    group = data['group'] ?? '';
     claimed = data['claimed'] ?? false;
   }
 }

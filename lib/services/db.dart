@@ -38,7 +38,7 @@ class Collection<T> {
   Future<List<T>> getData() async {
     var snapshots = await ref.getDocuments();
     return snapshots.documents
-        .map((doc) => Global.models[T](doc.data) as T)
+        .map((doc) => Global.models[T](doc) as T)
         .toList();
   }
 
@@ -49,7 +49,6 @@ class Collection<T> {
 }
 
 class UserData<T> {
-  final Firestore _db = Firestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final String collection;
 

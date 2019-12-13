@@ -12,7 +12,7 @@ class Global {
   // Data Models
   static final Map models = {
     Gift: (data) => Gift.fromMap(data),
-    Guest: (data) => Guest.fromMap(data),
+    Guest: (data) => Guest.fromSnapshot(data),
     User: (data) => User.fromMap(data)
   };
 

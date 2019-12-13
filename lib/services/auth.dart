@@ -42,14 +42,14 @@ class AuthService {
     return user;
   }
 
-  Future<void> updateUserData(FirebaseUser user, String phoneNumber, Guest guest) async {
+  Future<void> updateUserData(
+      FirebaseUser user, String phoneNumber, Guest guest) async {
     DocumentReference userRef = _db.collection('users').document(user.uid);
 
     return userRef.setData({
-      'uid': user.uid,
       'phoneNumber': phoneNumber,
       'name': guest.name,
-      'guestId': guest.id,
+      'group': guest.id,
       'claimed': true
     });
   }
