@@ -1,34 +1,26 @@
 import 'dart:ui';
-
-import 'package:den_store_dag/widgets/button.dart';
+import 'package:den_store_dag/screens/wrapper.dart';
+import 'package:den_store_dag/widgets/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/services.dart';
-import '../shared/shared.dart';
 
 class GiftsScreen extends StatelessWidget {
   final AuthService auth = AuthService();
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: Global.giftsRef.streamData(),
-      builder: (BuildContext context, AsyncSnapshot snap) {
-        if (snap.hasData) {
-          List<Gift> gifts = snap.data;
-          return Scaffold(
-            body: GridView.count(
-              primary: false,
-              padding: const EdgeInsets.all(20.0),
-              mainAxisSpacing: 30.0,
-              crossAxisCount: 1,
-              children: gifts.map((gift) => GiftItem(gift: gift)).toList(),
-            ),
-          );
-        } else {
-          return LoadingScreen();
-        }
-      },
+    var gifts = Provider.of<List<Gift>>(context);
+
+    return Scaffold(
+      body: GridView.count(
+        primary: false,
+        padding: const EdgeInsets.all(20.0),
+        mainAxisSpacing: 30.0,
+        crossAxisCount: 1,
+        children: gifts.map((gift) => GiftItem(gift: gift)).toList(),
+      ),
     );
   }
 }
@@ -39,7 +31,7 @@ class GiftItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var taken = gift.group == null ? false : true;
+    bool taken = gift.group == null ? false : true;
 
     return Hero(
       tag: gift.image,
@@ -103,7 +95,7 @@ class GiftItem extends StatelessWidget {
                   right: 100,
                   left: 100,
                   child: Button(
-                      text: 'Frigiv ønske',
+                      text: 'FRIGIV ØNSKE',
                       onPressed: () {
                         _releaseGift(gift);
                       }))
@@ -116,11 +108,11 @@ class GiftItem extends StatelessWidget {
 
 class GiftScreen extends StatelessWidget {
   final Gift gift;
-
-  GiftScreen({this.gift});
+  const GiftScreen({Key key, this.gift}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    bool taken = gift.group == null ? false : true;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
@@ -143,11 +135,19 @@ class GiftScreen extends StatelessWidget {
                       onPressed: _launchURL,
                       child: Text('Gå til hjemmeside'),
                     )),
-              Button(
-                  text: 'VÆLG GAVE',
-                  onPressed: () {
-                    _selectGift(gift);
-                  }),
+              taken
+                  ? Button(
+                      text: 'FRIGIV ØNSKE',
+                      onPressed: () async {
+                        await _releaseGift(gift);
+                        Navigator.pop(context);
+                      })
+                  : Button(
+                      text: 'VÆLG ØNSKE',
+                      onPressed: () async {
+                        await _selectGift(gift);
+                        Navigator.pop(context);
+                      })
             ],
           )),
     );
@@ -162,12 +162,12 @@ class GiftScreen extends StatelessWidget {
   }
 }
 
-void _releaseGift(Gift gift) async {
+Future<void> _releaseGift(Gift gift) async {
   Document<Gift> ref = Document(path: 'gifts/${gift.id}');
   ref.upsert({'group': null});
 }
 
-void _selectGift(Gift gift) async {
+Future<void> _selectGift(Gift gift) async {
   var user = await Global.userRef.getDocument();
   Document<Gift> ref = Document(path: 'gifts/${gift.id}');
   ref.upsert({'group': user.group});

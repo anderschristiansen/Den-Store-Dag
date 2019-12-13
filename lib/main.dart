@@ -11,10 +11,14 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final db = DatabaseService();
+
     return MultiProvider(
       providers: [
-        StreamProvider<List<Gift>>.value(value: Global.giftsRef.streamData()),
-        StreamProvider<FirebaseUser>.value(value: AuthService().user)
+        // StreamProvider<List<Gift>>.value(value: Global.giftsRef.streamData()),
+        StreamProvider<FirebaseUser>.value(value: AuthService().user),
+
+        StreamProvider<List<Gift>>.value(value: db.streamGifts()),
       ],
       child: MaterialApp(
         // Firebase Analytics

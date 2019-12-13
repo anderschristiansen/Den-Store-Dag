@@ -106,19 +106,9 @@ class Gift {
 
   Gift({this.id, this.group, this.name, this.image, this.web, this.price});
 
-  factory Gift.fromMap(Map data) {
-    return Gift(
-      id: '',
-      group: data['group'],
-      name: data['name'],
-      image: data['image'],
-      web: data['web'],
-      price: data['price'] ?? 0,
-    );
-  }
-
-  factory Gift.fromSnapshot(DocumentSnapshot doc) {
-    var data = doc.data;
+factory Gift.fromFirestore(DocumentSnapshot doc) {
+    Map data = doc.data;
+    
     return Gift(
       id: doc.documentID,
       group: data['group'],
@@ -128,6 +118,29 @@ class Gift {
       price: data['price'] ?? 0,
     );
   }
+
+  // factory Gift.fromMap(Map data) {
+  //   return Gift(
+  //     id: '',
+  //     group: data['group'],
+  //     name: data['name'],
+  //     image: data['image'],
+  //     web: data['web'],
+  //     price: data['price'] ?? 0,
+  //   );
+  // }
+
+  // factory Gift.fromSnapshot(DocumentSnapshot doc) {
+  //   var data = doc.data;
+  //   return Gift(
+  //     id: doc.documentID,
+  //     group: data['group'],
+  //     name: data['name'],
+  //     image: data['image'],
+  //     web: data['web'],
+  //     price: data['price'] ?? 0,
+  //   );
+  // }
 }
 
 class Guest {
