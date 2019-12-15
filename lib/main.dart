@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_analytics/observer.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'services/services.dart';
 import 'screens/screens.dart';
 import 'package:provider/provider.dart';
@@ -15,10 +14,11 @@ class MyApp extends StatelessWidget {
 
     return MultiProvider(
       providers: [
-        // StreamProvider<List<Gift>>.value(value: Global.giftsRef.streamData()),
-        StreamProvider<FirebaseUser>.value(value: AuthService().user),
-
+        StreamProvider<User>.value(value: AuthService().user),
+        // StreamProvider<UserData>.value(value: db.userData),
         StreamProvider<List<Gift>>.value(value: db.streamGifts()),
+        StreamProvider<List<Invite>>.value(value: db.streamInvites()),
+        StreamProvider<List<Event>>.value(value: db.streamEvents()),
       ],
       child: MaterialApp(
         // Firebase Analytics
@@ -28,8 +28,8 @@ class MyApp extends StatelessWidget {
 
         // Named Routes
         routes: {
-          '/': (context) => LoginScreen(),
-          '/home': (context) => WrapperScreen(),
+          '/': (context) => WrapperScreen(),
+          '/home': (context) => HomeScreen(),
           '/profile': (context) => ProfileScreen(),
         },
 

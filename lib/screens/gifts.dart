@@ -1,5 +1,5 @@
 import 'dart:ui';
-import 'package:den_store_dag/screens/wrapper.dart';
+import 'package:den_store_dag/shared/shared.dart';
 import 'package:den_store_dag/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +8,7 @@ import '../services/services.dart';
 
 class GiftsScreen extends StatelessWidget {
   final AuthService auth = AuthService();
+  final DatabaseService db = DatabaseService();
 
   @override
   Widget build(BuildContext context) {
@@ -31,78 +32,103 @@ class GiftItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool taken = gift.group == null ? false : true;
+    var user = Provider.of<User>(context);
+    bool taken = gift.invite == null ? false : true;
 
-    return Hero(
-      tag: gift.image,
-      child: Stack(
-        children: <Widget>[
-          Positioned.fill(
-            child: Card(
-                color: taken ? Colors.white : Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15.0),
-                ),
-                elevation: 5,
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (BuildContext context) =>
-                            GiftScreen(gift: gift),
-                      ),
-                    );
-                  },
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 20),
-                        child: Text(
-                          gift.name,
-                          style: Theme.of(context).textTheme.headline,
-                          overflow: TextOverflow.fade,
-                          softWrap: false,
+    return StreamBuilder<UserData>(
+        stream: DatabaseService(uid: user.uid).userData,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            UserData userData = snapshot.data;
+            return Hero(
+              tag: gift.image,
+              child: Stack(
+                children: <Widget>[
+                  Positioned.fill(
+                    child: Card(
+                        color: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15.0),
                         ),
-                      ),
-                      Expanded(
-                        child: taken
-                            ? Container(
-                                child: BackdropFilter(
-                                  filter:
-                                      ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-                                  child: Container(
-                                    color: Colors.white.withOpacity(0.5),
-                                  ),
+                        elevation: 5,
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          onTap: () {
+                            if (!taken) {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      GiftScreen(gift: gift),
                                 ),
-                                decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                        image: new NetworkImage(gift.image),
-                                        fit: BoxFit.contain)),
-                              )
-                            : Image.network(gift.image, fit: BoxFit.contain),
-                      ),
-                    ],
+                              );
+                            }
+                          },
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(top: 20),
+                                child: Text(
+                                  gift.name,
+                                  style: Theme.of(context).textTheme.headline,
+                                  overflow: TextOverflow.fade,
+                                  softWrap: false,
+                                ),
+                              ),
+                              Expanded(
+                                child: taken
+                                    ? Container(
+                                        child: BackdropFilter(
+                                          filter: ImageFilter.blur(
+                                              sigmaX: 2, sigmaY: 2),
+                                          child: Container(
+                                            color:
+                                                Colors.white.withOpacity(0.5),
+                                          ),
+                                        ),
+                                        decoration: BoxDecoration(
+                                            image: DecorationImage(
+                                                image: NetworkImage(gift.image),
+                                                fit: BoxFit.contain)),
+                                      )
+                                    : Image.network(gift.image,
+                                        fit: BoxFit.contain),
+                              ),
+                            ],
+                          ),
+                        )),
                   ),
-                )),
-          ),
-          taken
-              ? Positioned(
-                  bottom: 145,
-                  top: 155,
-                  right: 100,
-                  left: 100,
-                  child: Button(
-                      text: 'FRIGIV ØNSKE',
-                      onPressed: () {
-                        _releaseGift(gift);
-                      }))
-              : new Container(),
-        ],
-      ),
-    );
+                  gift.invite != null
+                      ? gift.invite == userData.invite
+                          ? Positioned(
+                              bottom: 145,
+                              top: 155,
+                              right: 100,
+                              left: 100,
+                              child: Button(
+                                  text: 'FRIGIV ØNSKE',
+                                  onPressed: () async {
+                                    await DatabaseService().releaseGift(gift);
+                                  }))
+                          : Positioned(
+                              bottom: 145,
+                              top: 155,
+                              right: 100,
+                              left: 100,
+                              child: Button(
+                                text: 'RESERVERET',
+                                onPressed: () {},
+                                color: Colors.grey,
+                              ))
+                      : Container()
+                ],
+              ),
+            );
+          } else {
+            return Loader();
+          }
+        });
   }
 }
 
@@ -112,45 +138,59 @@ class GiftScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool taken = gift.group == null ? false : true;
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).primaryColor,
-        title: Text(gift.name),
-      ),
-      body: Padding(
-          padding: const EdgeInsets.all(40.0),
-          child: Column(
-            children: <Widget>[
-              Hero(
-                tag: gift.image,
-                child: Image.network(gift.image,
-                    width: MediaQuery.of(context).size.width),
+    var user = Provider.of<User>(context);
+
+    bool taken = gift.invite == null ? false : true;
+
+    return StreamBuilder<UserData>(
+        stream: DatabaseService(uid: user.uid).userData,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            UserData userData = snapshot.data;
+            return Scaffold(
+              appBar: AppBar(
+                backgroundColor: Theme.of(context).primaryColor,
+                title: Text(gift.name),
               ),
-              Padding(padding: const EdgeInsets.only(top: 20.0)),
-              if (gift.web != null)
-                Padding(
-                    padding: const EdgeInsets.only(top: 30.0, bottom: 30),
-                    child: FlatButton(
-                      onPressed: _launchURL,
-                      child: Text('Gå til hjemmeside'),
-                    )),
-              taken
-                  ? Button(
-                      text: 'FRIGIV ØNSKE',
-                      onPressed: () async {
-                        await _releaseGift(gift);
-                        Navigator.pop(context);
-                      })
-                  : Button(
-                      text: 'VÆLG ØNSKE',
-                      onPressed: () async {
-                        await _selectGift(gift);
-                        Navigator.pop(context);
-                      })
-            ],
-          )),
-    );
+              body: Padding(
+                  padding: const EdgeInsets.all(40.0),
+                  child: Column(
+                    children: <Widget>[
+                      Hero(
+                        tag: gift.image,
+                        child: Image.network(gift.image,
+                            width: MediaQuery.of(context).size.width),
+                      ),
+                      Padding(padding: const EdgeInsets.only(top: 20.0)),
+                      if (gift.web != null)
+                        Padding(
+                            padding:
+                                const EdgeInsets.only(top: 30.0, bottom: 30),
+                            child: FlatButton(
+                              onPressed: _launchURL,
+                              child: Text('Gå til hjemmeside'),
+                            )),
+                      taken
+                          ? Button(
+                              text: 'FRIGIV ØNSKE',
+                              onPressed: () async {
+                                await DatabaseService().releaseGift(gift);
+                                Navigator.pop(context);
+                              })
+                          : Button(
+                              text: 'VÆLG ØNSKE',
+                              onPressed: () async {
+                                await DatabaseService()
+                                    .chooseGift(gift, userData.invite);
+                                Navigator.pop(context);
+                              })
+                    ],
+                  )),
+            );
+          } else {
+            return Loader();
+          }
+        });
   }
 
   _launchURL() async {
@@ -160,17 +200,6 @@ class GiftScreen extends StatelessWidget {
       throw 'Could not launch ${gift.web}';
     }
   }
-}
-
-Future<void> _releaseGift(Gift gift) async {
-  Document<Gift> ref = Document(path: 'gifts/${gift.id}');
-  ref.upsert({'group': null});
-}
-
-Future<void> _selectGift(Gift gift) async {
-  var user = await Global.userRef.getDocument();
-  Document<Gift> ref = Document(path: 'gifts/${gift.id}');
-  ref.upsert({'group': user.group});
 }
 
 // class GiftList extends StatelessWidget {

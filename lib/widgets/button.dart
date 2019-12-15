@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 class Button extends StatelessWidget {
   final String text;
   final Function onPressed;
+  final Color color;
 
-  const Button({Key key, this.text, this.onPressed}) : super(key: key);
+  const Button({Key key, this.text, this.onPressed, this.color})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +14,7 @@ class Button extends StatelessWidget {
       margin: EdgeInsets.only(bottom: 10),
       child: FlatButton(
         padding: EdgeInsets.all(20),
-        color: Theme.of(context).buttonColor,
+        color: (color == null) ? Theme.of(context).buttonColor : color,
         onPressed: () async {
           onPressed();
           // var user = await loginMethod();

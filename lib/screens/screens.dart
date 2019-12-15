@@ -3,6 +3,7 @@ export 'gifts.dart';
 export 'wrapper.dart';
 export 'events.dart';
 export 'profile.dart';
+export 'home.dart';
 
 // export 'topics.dart';
 // export 'quiz.dart';

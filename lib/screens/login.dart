@@ -3,6 +3,7 @@ import 'package:den_store_dag/widgets/pincode.dart';
 import 'package:den_store_dag/widgets/widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/services.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -13,34 +14,24 @@ class LoginScreenState extends State<LoginScreen> {
   AuthService auth = AuthService();
   FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   FirebaseUser _user;
-  FirebaseUser _currentUser;
 
   String _verificationId;
-  List<Guest> _guests;
+  List<Invite> _invites;
 
-  String _group;
+  String _inviteId;
   String _phoneNumber;
   String _smsCode;
+  Invite _invite;
 
-  bool _showGroup = true;
+  bool _showInvite = true;
   bool _showPhoneNumber = false;
   bool _showSmsCode = false;
-  bool _showAttending = false;
-
-  @override
-  void initState() {
-    super.initState();
-    auth.getUser.then(
-      (user) {
-        if (user != null) {
-          Navigator.pushReplacementNamed(context, '/home');
-        }
-      },
-    );
-  }
+  bool _showUser = false;
 
   @override
   Widget build(BuildContext context) {
+    _invites = Provider.of<List<Invite>>(context);
+
     return Scaffold(
       body: Container(
         padding: EdgeInsets.fromLTRB(30, 100, 30, 0),
@@ -55,22 +46,39 @@ class LoginScreenState extends State<LoginScreen> {
               style: Theme.of(context).textTheme.headline,
               textAlign: TextAlign.center,
             ),
-            _showGroup
+            _showInvite
                 ? new Pincode(
                     length: 1,
                     inputType: TextInputType.text,
                     onPressed: (newValue) {
                       setState(() {
-                        _group = newValue;
+                        _inviteId = newValue;
                       });
                     })
                 : new Container(),
-            _showGroup
+            _showInvite
                 ? Button(
                     text: 'TJEK AKTIVERINGSKODE',
                     onPressed: () {
-                      _verifyGroup();
+                      _verifyInvite();
                     },
+                  )
+                : new Container(),
+            _showUser
+                ? Column(
+                    children: <Widget>[
+                      for (var invite in _invites)
+                        FlatButton(
+                          child: Text(invite.name),
+                          onPressed: () {
+                            _invite = invite;
+                            setState(() {
+                              _showPhoneNumber = true;
+                              _showUser = false;
+                            });
+                          },
+                        )
+                    ],
                   )
                 : new Container(),
             _showPhoneNumber
@@ -108,39 +116,24 @@ class LoginScreenState extends State<LoginScreen> {
                     },
                   )
                 : new Container(),
-            _showAttending
-                ? Column(
-                    children: <Widget>[
-                      for (var guest in _guests)
-                        FlatButton(
-                          child: Text(guest.name),
-                          onPressed: () {
-                            _claimUser(guest);
-                          },
-                        )
-                    ],
-                  )
-                : new Container(),
           ],
         ),
       ),
     );
   }
 
-  void _verifyGroup() async {
-    _guests = (await Global.guestsRef.getData())
-        .where((guests) => guests.group == _group)
-        .toList();
+  void _verifyInvite() async {
+    bool verified = _invites.where((doc) => doc.id == _inviteId).isNotEmpty;
 
-    if (_guests.isNotEmpty) {
+    if (verified) {
       setState(() {
-        _showGroup = false;
-        _showPhoneNumber = true;
+        _showInvite = false;
+        _showUser = true;
       });
     } else {
       setState(() {
-        _showGroup = true;
-        _showPhoneNumber = false;
+        _showInvite = true;
+        _showUser = false;
       });
       FlushbarHelper.createError(
               message: 'Forkert kode, prøv igen', title: 'Fejl')
@@ -148,7 +141,6 @@ class LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  // Example code of how to verify phone number
   void _verifyPhoneNumber() async {
     final PhoneVerificationCompleted verificationCompleted =
         (AuthCredential phoneAuthCredential) {
@@ -204,20 +196,7 @@ class LoginScreenState extends State<LoginScreen> {
       smsCode: _smsCode,
     );
     _user = (await _firebaseAuth.signInWithCredential(credential)).user;
-    _currentUser = await _firebaseAuth.currentUser();
-
-    setState(() {
-      _showSmsCode = false;
-      _showAttending = true;
-    });
-  }
-
-  void _claimUser(Guest guest) async {
-    auth.updateUserData(_user, _phoneNumber, guest);
-
-    assert(_user.uid == _currentUser.uid);
-    if (_user != null) {
-      Navigator.pushReplacementNamed(context, '/home');
-    }
+    await DatabaseService(uid: _user.uid)
+        .updateUserData(_invite.name, _phoneNumber, _invite.id, true);
   }
 }

@@ -3,28 +3,80 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'services.dart';
 
 class DatabaseService {
-  final Firestore _db = Firestore.instance;
+  final String uid;
+  DatabaseService({this.uid});
 
-  /// Get a stream of a single document
-  Stream<Gift> streamGift(String id) {
-    return _db
-        .collection('gifts')
-        .document(id)
-        .snapshots()
-        .map((snap) => Gift.fromFirestore(snap));
+  final CollectionReference userCollection =
+      Firestore.instance.collection('users');
+  final CollectionReference inviteCollection =
+      Firestore.instance.collection('invites');
+  final CollectionReference giftCollection =
+      Firestore.instance.collection('gifts');
+  final CollectionReference eventCollection =
+      Firestore.instance.collection('events');
+
+  Future updateUserData(
+      String name, String phoneNumber, String invite, bool claimed) async {
+    return await userCollection.document(uid).setData({
+      'name': name,
+      'phoneNumber': phoneNumber,
+      'invite': invite,
+      'claimed': claimed
+    });
   }
 
-  /// Query a subcollection
-  Stream<List<Gift>> streamGifts() {
-    var ref = _db.collection('gifts');
+  UserData _userDataFromSnapshot(DocumentSnapshot snapshot) {
+    return UserData(
+        uid: uid,
+        name: snapshot.data['name'],
+        phoneNumber: snapshot.data['phoneNumber'],
+        invite: snapshot.data['invite'],
+        claimed: snapshot.data['claimed']);
+  }
 
-    return ref.snapshots().map((list) =>
+  Stream<UserData> get userData {
+    return userCollection.document(uid).snapshots().map(_userDataFromSnapshot);
+  }
+
+  Stream<List<UserData>> streamUsers() {
+    return userCollection.snapshots().map((list) =>
+        list.documents.map((doc) => UserData.fromMap(doc.data)).toList());
+  }
+
+  // Future<bool> verifyInvite(String id) async {
+  //   final QuerySnapshot result = await inviteCollection
+  //       .where('id', isEqualTo: id)
+  //       .limit(1)
+  //       .getDocuments();
+  //   final List<DocumentSnapshot> documents = result.documents;
+  //   return documents.length == 1;
+  // }
+
+  Stream<List<Invite>> streamInvites() {
+    return inviteCollection.snapshots().map((list) =>
+        list.documents.map((doc) => Invite.fromMap(doc.data)).toList());
+  }
+
+  Stream<List<Gift>> streamGifts() {
+    return giftCollection.snapshots().map((list) =>
         list.documents.map((doc) => Gift.fromFirestore(doc)).toList());
   }
 
-  /// Write data
-  Future<void> createHero(String heroId) {
-    return _db.collection('heroes').document(heroId).setData({/* some data */});
+  Future chooseGift(Gift gift, String invite) async {
+    return await giftCollection
+        .document(gift.id)
+        .setData({'invite': invite}, merge: true);
+  }
+
+  Future releaseGift(Gift gift) async {
+    return await giftCollection
+        .document(gift.id)
+        .setData({'invite': null}, merge: true);
+  }
+
+  Stream<List<Event>> streamEvents() {
+    return eventCollection.snapshots().map((list) =>
+        list.documents.map((doc) => Event.fromFirestore(doc)).toList());
   }
 }
 
